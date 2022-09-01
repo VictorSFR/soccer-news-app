@@ -1,4 +1,4 @@
-package com.victor.soccernews.ui.notifications;
+package com.victor.soccernews.ui.dashboard;
 
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -10,22 +10,22 @@ import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 
-import com.victor.soccernews.databinding.FragmentNotificationsBinding;
+import com.victor.soccernews.databinding.FragmentFavoritesBinding;
 
-public class NotificationsFragment extends Fragment {
+public class FavoritesFragment extends Fragment {
 
-    private FragmentNotificationsBinding binding;
+    private FragmentFavoritesBinding binding;
 
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState) {
-        NotificationsViewModel notificationsViewModel =
-                new ViewModelProvider(this).get(NotificationsViewModel.class);
+        FavoritesDashboardViewModel favoritesDashboardViewModel =
+                new ViewModelProvider(this).get(FavoritesDashboardViewModel.class);
 
-        binding = FragmentNotificationsBinding.inflate(inflater, container, false);
+        binding = FragmentFavoritesBinding.inflate(inflater, container, false);
         View root = binding.getRoot();
 
-        final TextView textView = binding.textNotifications;
-        notificationsViewModel.getText().observe(getViewLifecycleOwner(), textView::setText);
+        
+        favoritesDashboardViewModel.getText().observe(getViewLifecycleOwner(), binding.textDashboard::setText);
         return root;
     }
 
