@@ -29,27 +29,24 @@ public class FavoritesFragment extends Fragment {
         FavoritesDashboardViewModel favoritesDashboardViewModel =
                 new ViewModelProvider(this).get(FavoritesDashboardViewModel.class);
         binding = FragmentFavoritesBinding.inflate(inflater, container, false);
+        loadFavoriteNews(favoritesDashboardViewModel);
 
-
-        loadFavoriteNews();
         return binding.getRoot();
     }
 
-    private void loadFavoriteNews() {
-        MainActivity activity = (MainActivity) getActivity();
-        if(activity != null){
-        List<News> favoriteNews = activity.getDb().newsDAO().loadFavoriteNews();
-        binding.rvNews.setLayoutManager(new LinearLayoutManager(getContext()));
-        binding.rvNews.setAdapter(new NewsAdapter(favoriteNews, updatedNews -> {
-            
+    private void loadFavoriteNews(FavoritesDashboardViewModel favoritesDashboardViewModel) {
+        favoritesDashboardViewModel.loadFavoriteNews().observe(getViewLifecycleOwner(), localNews -> {
+            binding.rvNews.setLayoutManager(new LinearLayoutManager(getContext()));
+            binding.rvNews.setAdapter(new NewsAdapter(localNews, updatedNews -> {
 
-                    activity.getDb().newsDAO().save(updatedNews);
-                    loadFavoriteNews();
-            
+                favoritesDashboardViewModel.saveNews(updatedNews);
+                
+                loadFavoriteNews(favoritesDashboardViewModel);
 
-        }));
-        }
+            }));
+        });
     }
+
 
     @Override
     public void onDestroyView() {

@@ -1,6 +1,5 @@
 package com.victor.soccernews.ui.news;
 
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -11,7 +10,7 @@ import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 
-import com.victor.soccernews.MainActivity;
+import com.google.android.material.snackbar.Snackbar;
 import com.victor.soccernews.data.local.AppDatabase;
 import com.victor.soccernews.databinding.FragmentNewsBinding;
 import com.victor.soccernews.ui.adapter.NewsAdapter;
@@ -30,30 +29,33 @@ public class NewsFragment extends Fragment {
         binding = FragmentNewsBinding.inflate(inflater, container, false);
         View root = binding.getRoot();
         binding.rvNews.setLayoutManager(new LinearLayoutManager(getContext()));
-        newsViewModel.getNews().observe(getViewLifecycleOwner(), news -> {
-            binding.rvNews.setAdapter(new NewsAdapter(news, favoritedNews -> {
-                MainActivity activity = (MainActivity) getActivity();
-                AsyncTask.execute(() -> {
-                    if(activity != null){
-                        activity.getDb().newsDAO().save(favoritedNews);
-                    }
+        observe(newsViewModel);
+        observeStates(newsViewModel);
+        binding.srlMatches.setOnRefreshListener(newsViewModel::findNews);
+        return root;
+    }
 
-                });
-
-            }));
-        });
+    private void observeStates(NewsViewModel newsViewModel) {
         newsViewModel.getState().observe(getViewLifecycleOwner(), state ->{
             switch (state){
                 case DOING:
-                    //TODO: Incluir swipe to refresh layout
+                    binding.srlMatches.setRefreshing(true);
                     break;
                 case DONE:
-
+                    binding.srlMatches.setRefreshing(false);
                     break;
                 case ERROR:
+                    binding.srlMatches.setRefreshing(false);
+                    Snackbar.make(binding.srlMatches, "Network error.", Snackbar.LENGTH_SHORT).show();
+
             }
         });
-        return root;
+    }
+
+    private void observe(NewsViewModel newsViewModel) {
+        newsViewModel.getNews().observe(getViewLifecycleOwner(), news -> {
+            binding.rvNews.setAdapter(new NewsAdapter(news, newsViewModel::saveNews));
+        });
     }
 
     @Override
